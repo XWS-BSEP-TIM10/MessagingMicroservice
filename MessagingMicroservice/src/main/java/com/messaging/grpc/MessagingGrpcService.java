@@ -18,7 +18,7 @@ import com.messaging.service.MessageService;
 
 @GrpcService
 public class MessagingGrpcService extends MessagingGrpcServiceGrpc.MessagingGrpcServiceImplBase{
-	 private ChatRoomService chatRoomService;
+	 private final ChatRoomService chatRoomService;
 	 private final SimpleDateFormat iso8601Formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	 private final MessageService messageService;
 	 	

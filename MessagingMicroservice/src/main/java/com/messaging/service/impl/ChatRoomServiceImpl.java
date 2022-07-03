@@ -7,9 +7,10 @@ import org.springframework.stereotype.Service;
 
 import com.messaging.model.ChatRoom;
 import com.messaging.repository.ChatRoomRepository;
+import com.messaging.service.ChatRoomService;
 
 @Service
-public class ChatRoomServiceImpl {
+public class ChatRoomServiceImpl implements ChatRoomService {
 	
 	 @Autowired private ChatRoomRepository chatRoomRepository;
 
