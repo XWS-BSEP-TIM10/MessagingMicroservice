@@ -1,11 +1,10 @@
 package com.messaging.repository;
 
-import java.util.ArrayList;
-
+import com.messaging.model.Message;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.messaging.model.Message;
+import java.util.ArrayList;
 
-public interface MessagingRepository extends MongoRepository<Message, String>{
-	ArrayList<Message> findByChatId(String chatId);
+public interface MessagingRepository extends MongoRepository<Message, String> {
+    ArrayList<Message> findByChatId(String chatId);
 }
