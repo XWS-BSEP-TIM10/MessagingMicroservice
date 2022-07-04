@@ -2,6 +2,8 @@ package com.messaging.grpc;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -13,6 +15,9 @@ import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import proto.ChatMessageProto;
 import proto.ChatMessageResponseProto;
+import proto.FindChatMessageProto;
+import proto.FindChatMessagesProto;
+import proto.FindChatMessagesResponseProto;
 import proto.MessagingGrpcServiceGrpc;
 import com.messaging.service.MessageService;
 
@@ -57,6 +62,20 @@ public class MessagingGrpcService extends MessagingGrpcServiceGrpc.MessagingGrpc
 	            loggerService.deleteExperience(String.valueOf(request.getId()));
 	        }*/
 
+	        
+	    }
+	 	
+	 	@Override
+	    public void findChatMessages(FindChatMessagesProto request, StreamObserver<FindChatMessagesResponseProto> responseObserver) {
+	 			List<Message> messages = messageService.findChatMessages(request.getSenderId(), request.getRecipientId());
+	 			List<FindChatMessageProto> chatMessagesProto = new ArrayList<FindChatMessageProto>();
+	 			for(Message message : messages) {
+	 				FindChatMessageProto findChatMessageProto = FindChatMessageProto.newBuilder().setId(message.getId()).setChatId(message.getChatId()).setSenderId(message.getSenderId()).setRecipientId(message.getRecipientId()).setSenderName(message.getSenderName()).setRecipientName(message.getRecipientName()).setContent(message.getContent()).setTimestamp(iso8601Formatter.format(message.getTimestamp())).setStatus(message.getStatus().toString()).build();
+	 				chatMessagesProto.add(findChatMessageProto);
+	 			}	 		
+	 			FindChatMessagesResponseProto responseProto = FindChatMessagesResponseProto.newBuilder().addAllMessages(chatMessagesProto).setStatus("200").build();			
+				responseObserver.onNext(responseProto);
+		        responseObserver.onCompleted(); 		 	   
 	        
 	    }
 	 
