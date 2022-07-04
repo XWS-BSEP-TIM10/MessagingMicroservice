@@ -3,6 +3,7 @@ package com.messaging.service.impl;
 import org.springframework.stereotype.Service;
 
 import com.messaging.model.Message;
+import com.messaging.model.MessageStatus;
 import com.messaging.repository.MessagingRepository;
 import com.messaging.service.MessageService;
 
@@ -17,6 +18,7 @@ public class MessageServiceImpl implements MessageService{
 	
 	@Override
 	public Message addMessage(Message message) {
+		message.setStatus(MessageStatus.RECEIVED);
 		return repo.save(message);
 	}
 

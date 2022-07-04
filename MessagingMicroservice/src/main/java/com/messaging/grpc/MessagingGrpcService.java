@@ -36,7 +36,7 @@ public class MessagingGrpcService extends MessagingGrpcServiceGrpc.MessagingGrpc
 	 		ChatMessageResponseProto responseProto;
 	 		
 	 		try {
-				Message newMessage = new Message(chatId.get(),request.getSenderId(),request.getRecipientId(),request.getSenderName(),request.getRecipientName(),request.getContent(),iso8601Formatter.parse(request.getTimestamp()),MessageStatus.valueOf(request.getStatus().toUpperCase()));
+				Message newMessage = new Message(chatId.get(),request.getSenderId(),request.getRecipientId(),request.getSenderName(),request.getRecipientName(),request.getContent(),iso8601Formatter.parse(request.getTimestamp()));
 				
 				Message addedMessage = messageService.addMessage(newMessage);
 				

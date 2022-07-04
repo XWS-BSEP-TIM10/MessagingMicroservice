@@ -22,7 +22,7 @@ public class Message {
 	   }
 
 	public Message(String chatId, String senderId, String recipientId, String senderName,
-			String recipientName, String content, Date timestamp, MessageStatus status) {
+			String recipientName, String content, Date timestamp) {
 		this.chatId = chatId;
 		this.senderId = senderId;
 		this.recipientId = recipientId;
@@ -30,7 +30,6 @@ public class Message {
 		this.recipientName = recipientName;
 		this.content = content;
 		this.timestamp = timestamp;
-		this.status = status;
 	}
 
 	public String getId() {
@@ -67,6 +66,10 @@ public class Message {
 
 	public MessageStatus getStatus() {
 		return status;
+	}
+
+	public void setStatus(MessageStatus status) {
+		this.status = status;
 	}
 	   
 	   
