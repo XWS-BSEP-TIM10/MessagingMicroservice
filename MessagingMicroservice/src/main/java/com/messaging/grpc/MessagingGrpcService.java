@@ -8,8 +8,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.messaging.model.Message;
-import com.messaging.model.MessageStatus;
 import com.messaging.service.ChatRoomService;
+import com.messaging.service.LoggerService;
+import com.messaging.service.MessageService;
+import com.messaging.service.impl.LoggerServiceImpl;
 
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -19,18 +21,19 @@ import proto.FindChatMessageProto;
 import proto.FindChatMessagesProto;
 import proto.FindChatMessagesResponseProto;
 import proto.MessagingGrpcServiceGrpc;
-import com.messaging.service.MessageService;
 
 @GrpcService
 public class MessagingGrpcService extends MessagingGrpcServiceGrpc.MessagingGrpcServiceImplBase{
 	 private final ChatRoomService chatRoomService;
 	 private final SimpleDateFormat iso8601Formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	 private final MessageService messageService;
+	 private final LoggerService loggerService;
 	 	
 	 	@Autowired
 	 	public MessagingGrpcService(MessageService messageService, ChatRoomService chatRoomService) {
 	 		this.messageService = messageService;
 	 		this.chatRoomService = chatRoomService;
+	 		this.loggerService = new LoggerServiceImpl(this.getClass());
 	 	}
 	 
 	 	@Override
@@ -46,21 +49,13 @@ public class MessagingGrpcService extends MessagingGrpcServiceGrpc.MessagingGrpc
 				Message addedMessage = messageService.addMessage(newMessage);
 				
 				responseProto = ChatMessageResponseProto.newBuilder().setId(addedMessage.getId()).setChatId(addedMessage.getChatId()).setSenderId(addedMessage.getSenderId()).setRecipientId(addedMessage.getRecipientId()).setSenderName(addedMessage.getSenderName()).setRecipientName(addedMessage.getRecipientName()).setContent(addedMessage.getContent()).setTimestamp(iso8601Formatter.format(addedMessage.getTimestamp())).setStatus(addedMessage.getStatus().toString()).setStatus("200").build();
+				loggerService.addMessage(addedMessage.getId(), addedMessage.getChatId());
 				responseObserver.onNext(responseProto);
 		        responseObserver.onCompleted();
 	 		} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				loggerService.addMessageBadDate(chatId.get());
 			}
 
-	      /*  boolean success = service.remove(request.getId());
-	        if (!success) {
-	            responseProto = RemoveExperienceResponseProto.newBuilder().setStatus(NOT_FOUND_STATUS).build();
-	            loggerService.deleteExperienceNotFound(String.valueOf(request.getId()));
-	        } else {
-	            responseProto = RemoveExperienceResponseProto.newBuilder().setStatus(OK_STATUS).build();
-	            loggerService.deleteExperience(String.valueOf(request.getId()));
-	        }*/
 
 	        
 	    }
@@ -74,7 +69,8 @@ public class MessagingGrpcService extends MessagingGrpcServiceGrpc.MessagingGrpc
 	 				chatMessagesProto.add(findChatMessageProto);
 	 			}	 		
 	 			FindChatMessagesResponseProto responseProto = FindChatMessagesResponseProto.newBuilder().addAllMessages(chatMessagesProto).setStatus("200").build();			
-				responseObserver.onNext(responseProto);
+				loggerService.getChat(request.getSenderId(), request.getRecipientId());
+	 			responseObserver.onNext(responseProto);
 		        responseObserver.onCompleted(); 		 	   
 	        
 	    }
