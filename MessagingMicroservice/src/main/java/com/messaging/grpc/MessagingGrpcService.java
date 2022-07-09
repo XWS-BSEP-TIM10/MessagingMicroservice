@@ -55,15 +55,12 @@ public class MessagingGrpcService extends MessagingGrpcServiceGrpc.MessagingGrpc
 	 		} catch (ParseException e) {
 				loggerService.addMessageBadDate(chatId.get());
 			}
-
-
-	        
 	    }
 	 	
 	 	@Override
 	    public void findChatMessages(FindChatMessagesProto request, StreamObserver<FindChatMessagesResponseProto> responseObserver) {
 	 			List<Message> messages = messageService.findChatMessages(request.getSenderId(), request.getRecipientId());
-	 			List<FindChatMessageProto> chatMessagesProto = new ArrayList<FindChatMessageProto>();
+	 			List<FindChatMessageProto> chatMessagesProto = new ArrayList<>();
 	 			for(Message message : messages) {
 	 				FindChatMessageProto findChatMessageProto = FindChatMessageProto.newBuilder().setId(message.getId()).setChatId(message.getChatId()).setSenderId(message.getSenderId()).setRecipientId(message.getRecipientId()).setSenderName(message.getSenderName()).setRecipientName(message.getRecipientName()).setContent(message.getContent()).setTimestamp(iso8601Formatter.format(message.getTimestamp())).setStatus(message.getStatus().toString()).build();
 	 				chatMessagesProto.add(findChatMessageProto);
