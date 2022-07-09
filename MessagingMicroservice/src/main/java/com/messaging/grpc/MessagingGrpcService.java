@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.messaging.model.Event;
+import com.messaging.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.messaging.model.Message;
@@ -15,12 +17,7 @@ import com.messaging.service.impl.LoggerServiceImpl;
 
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
-import proto.ChatMessageProto;
-import proto.ChatMessageResponseProto;
-import proto.FindChatMessageProto;
-import proto.FindChatMessagesProto;
-import proto.FindChatMessagesResponseProto;
-import proto.MessagingGrpcServiceGrpc;
+import proto.*;
 
 @GrpcService
 public class MessagingGrpcService extends MessagingGrpcServiceGrpc.MessagingGrpcServiceImplBase{
@@ -28,12 +25,14 @@ public class MessagingGrpcService extends MessagingGrpcServiceGrpc.MessagingGrpc
 	 private final SimpleDateFormat iso8601Formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	 private final MessageService messageService;
 	 private final LoggerService loggerService;
+	 private final EventService eventService;
 	 	
 	 	@Autowired
-	 	public MessagingGrpcService(MessageService messageService, ChatRoomService chatRoomService) {
+	 	public MessagingGrpcService(MessageService messageService, ChatRoomService chatRoomService, EventService eventService) {
 	 		this.messageService = messageService;
 	 		this.chatRoomService = chatRoomService;
-	 		this.loggerService = new LoggerServiceImpl(this.getClass());
+			this.eventService = eventService;
+			this.loggerService = new LoggerServiceImpl(this.getClass());
 	 	}
 	 
 	 	@Override
@@ -49,6 +48,7 @@ public class MessagingGrpcService extends MessagingGrpcServiceGrpc.MessagingGrpc
 				Message addedMessage = messageService.addMessage(newMessage);
 				
 				responseProto = ChatMessageResponseProto.newBuilder().setId(addedMessage.getId()).setChatId(addedMessage.getChatId()).setSenderId(addedMessage.getSenderId()).setRecipientId(addedMessage.getRecipientId()).setSenderName(addedMessage.getSenderName()).setRecipientName(addedMessage.getRecipientName()).setContent(addedMessage.getContent()).setTimestamp(iso8601Formatter.format(addedMessage.getTimestamp())).setStatus(addedMessage.getStatus().toString()).setStatus("200").build();
+				eventService.save(new Event("User with id: " + request.getSenderId() + " send message to user with id: " + request.getRecipientId()));
 				loggerService.addMessage(addedMessage.getId(), addedMessage.getChatId());
 				responseObserver.onNext(responseProto);
 		        responseObserver.onCompleted();
@@ -74,5 +74,18 @@ public class MessagingGrpcService extends MessagingGrpcServiceGrpc.MessagingGrpc
 		        responseObserver.onCompleted(); 		 	   
 	        
 	    }
+
+	@Override
+	public void getMessagingEvents(MessagingEventProto request, StreamObserver<MessagingEventResponseProto> responseObserver) {
+
+		List<String> events = new ArrayList<>();
+		for(Event event : eventService.findAll()){events.add(event.getDescription());}
+
+		MessagingEventResponseProto responseProto = MessagingEventResponseProto.newBuilder().addAllEvents(events).build();
+
+		responseObserver.onNext(responseProto);
+		responseObserver.onCompleted();
+	}
+
 	 
 }
